@@ -28,5 +28,5 @@ async def main():
         await loadExtensions()
         await bot.start("INSERT API KEY")
 
-# Run the main functino
+# Run the main function
 asyncio.run(main())
