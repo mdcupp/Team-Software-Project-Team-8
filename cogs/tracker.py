@@ -13,9 +13,8 @@ class Tracker(commands.Cog):
         if message.author == self.bot.user or message.is_system():
             return
 
-        author_name = str(message.author)
         content = str(message.content)
 
         #Track not commands
         if not content.startswith('!'):
-            self.db.insertMessage(author_name, content)
+            self.db.insertMessage(message.author, content)

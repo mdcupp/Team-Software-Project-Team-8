@@ -15,7 +15,7 @@ class Commands(commands.Cog):
         **Command List**:
         !helpMe - List Commands
         !ping - Test Command
-        !getMessageCount - Prints message count recorded from user
+        !messageTotal <username> - Prints message count recorded from user
         !resetMessageTable - Clear message table
         !displayData <username> - Get public data of a user (Doesn't pull real data yet)
         !activityList <username> - Get activity list of a user (Doesn't pull real data yet) 
@@ -35,12 +35,20 @@ class Commands(commands.Cog):
 
     # Prints message count from user
     @commands.command()
-    async def getMessageCount(self, ctx):
-        author_name = str(ctx.author)
+    async def messageTotal(self, ctx, *username):
+        if (len(username) == 0):
+            await ctx.send("Usage: !messageTotal <username>")
+            return
         
-        count = self.db.getMessageCount(author_name)
+        try:
+            member = await commands.MemberConverter().convert(ctx, username[0])
+        except commands.errors.MemberNotFound:
+            await ctx.send(f"**{username[0]}** could not be found in this server.")
+            return
+
+        count = self.db.getMessageCount(member.id)
         
-        await ctx.send(f"**{author_name}** has recorded {count} messages.")
+        await ctx.send(f"**{member.name}** has sent {count} messages.")
 
 
     # Display public data of a given user

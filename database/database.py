@@ -33,16 +33,16 @@ class Database():
         time = datetime.now()
         self.cursor.execute("""
                             INSERT INTO messages VALUES(?, ?, ?); 
-                            """, (author, message, time))
+                            """, (author.id, message, time))
         self.con.commit()
 
         print(f"LOG: Message logged by {author} - '{message}' @ {time}")
 
-    # get the num of messages from author
-    def getMessageCount(self, author):
+    # get the num of messages from author id
+    def getMessageCount(self, author_id):
         result = self.cursor.execute("""
                                      SELECT COUNT(*) FROM messages WHERE author = ?;
-                                     """, (author,))
+                                     """, (author_id,))
         result = self.cursor.fetchone() 
     
         count = result[0] if result else 0
