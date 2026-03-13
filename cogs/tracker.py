@@ -27,10 +27,6 @@ class Tracker(commands.Cog):
         beforeActivityList = before.activities
         afterActivityList = after.activities
 
-        # Nothing to update if nothing has been closed
-        if beforeActivityList == None:
-            return
-
         # Iterate through tuple of activities until one that should be tracked is found
         i = 0
         for act in beforeActivityList:
