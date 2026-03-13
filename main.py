@@ -7,6 +7,8 @@ from database.database import Database
 # Registers the intents (permissions) that the bot has access to
 intents = discord.Intents.default()
 intents.message_content = True
+intents.members = True
+intents.presences = True
 
 # Creates bot with prefix and intents
 bot = commands.Bot(command_prefix='!', intents=intents)
@@ -26,7 +28,7 @@ async def loadExtensions():
 async def main():
     async with bot:
         await loadExtensions()
-        await bot.start("INSERT API KEY")
+        await bot.start("API KEY")
 
 # Run the main function
 asyncio.run(main())
