@@ -108,7 +108,12 @@ class Commands(commands.Cog):
         # as far as I can tell there is no easy way to check if a given global emoji exists, as emojiConverter and emoji objects are only for custom emojis, 
         # so verification of an emoji's existence should be based on if it is present in the table, make sure table can store both normal and custom
 
-        await ctx.send(f"{parameters[0]} counts for **{member.name}**:\nSent: x\nRecieved: y.")
+        sent, received = self.db.getReactionCount(member.id, parameters[0])
+
+        await ctx.send(f"{parameters[0]} counts for **{member.name}**:\n"
+                       f"Sent: {sent}\n"
+                       f"Received: {received}"
+                      )
 
     # View leaderboard for a reaction
     @commands.command()
