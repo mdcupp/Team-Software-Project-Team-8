@@ -20,6 +20,20 @@ class Tracker(commands.Cog):
         if not content.startswith('!'):
             self.db.insertMessage(message.author, content)
 
+    # On every reaction sent
+    async def on_reaction_add(self, reaction, user):
+        # Ignore bot reactions
+        if user.bot:
+            return
+
+        emoji = str(reaction.emoji)
+
+        sender_id = user.id
+        receiver_id = reaction.message.author.id
+        message_id = reaction.message.id
+
+        self.db.insertReaction(emoji, sender_id, receiver_id, message_id)
+    
     # On status or activity updates
     @commands.Cog.listener()
     async def on_presence_update(self, before, after):
