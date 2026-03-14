@@ -83,7 +83,7 @@ class Database():
     # Get reaction count for a given user
     def getReactionCount(self, author_id):
         result = self.cursor.execute("""
-                                     SELECT COUNT(*) FROM messages WHERE author = ?;
+                                     SELECT COUNT(*) FROM reactions WHERE author = ?;
                                      """, (author_id,))
         result = self.cursor.fetchone()
 
