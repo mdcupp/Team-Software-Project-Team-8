@@ -9,6 +9,7 @@ class Database():
 
         self.createMessageTable()
         self.createReactionTable()
+        self.createActivityTable()
 
         
     # Creates the message table ONLY IF IT DOES NOT EXIST
@@ -94,3 +95,52 @@ class Database():
         received = self.cursor.execute(received_query, (user_id, emoji)).fetchone()[0]
 
         return sent, received
+    
+    # Create activity table if it doesn't exist
+    def createActivityTable(self):
+        self.cursor.execute("""
+                            CREATE TABLE IF NOT EXISTS activity(user, activity, seconds);
+                            """)
+
+        print("LOG: Activity Table created if not already existing")
+
+    # Reset activity table
+    def resetActivityTable(self):
+        self.cursor.executescript("""
+                                  DROP TABLE IF EXISTS activity;
+                                  CREATE TABLE IF NOT EXISTS activity(user, activity, seconds);
+                                  """)
+        self.con.commit()
+
+        print("LOG: Activity Table reset")
+
+    # Insert activity into table
+    def insertActivity(self, user, activity, seconds):
+        # Check if this activity has been logged before
+        exists = self.cursor.execute("""
+                            SELECT COUNT(*) FROM activity WHERE user = ? AND activity = ?;
+                            """, (user, activity)).fetchone()[0]
+
+        if exists == 0:
+            # Activity has not been logged before
+            self.cursor.execute("""
+                            INSERT INTO activity VALUES(?, ?, ?);
+                            """, (user, activity, seconds))
+        else:
+            # Activty HAS been logged before
+            self.cursor.execute("""
+                            UPDATE activity SET seconds = seconds + ? WHERE user = ? and activity = ?;
+                            """, (seconds, user, activity))
+        
+
+        self.con.commit()
+
+        print(f"LOG: Activity {activity} - {seconds}s by {user}")
+
+    # Get the activity time in seconds for a given user
+    def getActivityTime(self, user):
+        result = self.cursor.execute("""
+                     SELECT activity, seconds FROM activity WHERE user = ? ORDER BY seconds DESC;
+                     """, (user)).fetchall()
+
+        return result

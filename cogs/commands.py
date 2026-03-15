@@ -79,13 +79,28 @@ class Commands(commands.Cog):
             await ctx.send(f"**{username[0]}** could not be found in this server.")
             return
 
-        # Dummy list, but should be formatted how it would be if this data was pulled from a table
-        list = [('activity1', '12'), ('activity22', '14')]
+        # Get Activity List
+        list = self.db.getActivityTime(username)
+        print(list)
 
-        printable_list = f"{'Activity':<16s}{'Hours':<5s}\n"
-        for activity, time in list:
-            printable_list = printable_list + f"{activity:16s}{time:5s}\n"
+        printable_list = f"{'Activity':<16s}{'H:Min:Sec':<9s}\n"
+        
+        # Turn seconds in Hours, Minutes, Seconds
+        for activity, seconds in list:
+            minutes = 0
+            hours = 0
+            while seconds > 60:
+                seconds -= 60
+                minutes += 1
+            while minutes > 60:
+                minutes - 60
+                hours += 1
 
+            # Format it
+            time = f"{hours}:{minutes:02d}:{seconds:02d}"
+            printable_list = printable_list + f"{activity:16s}{time:9s}\n"
+
+        # Print it
         await ctx.send(f"Recorded activities for **{username[0]}**:\n```{printable_list}```")
 
     # View how many times a user has sent a reaction
@@ -146,4 +161,5 @@ class Commands(commands.Cog):
             printable_list = printable_list + f"{member.name:<16s}{sent:<5d}{received:<5d}\n"
 
         await ctx.send(f"Top {limit} users of {parameters[0]} by total {parameters[2]}:\n```{printable_list}```")
-        
+    
+

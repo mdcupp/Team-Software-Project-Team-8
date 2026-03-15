@@ -59,6 +59,10 @@ class Tracker(commands.Cog):
             if act.type == discord.ActivityType.playing and act.application_id == beforeActivityList[i].application_id:
                 return
 
+        activity = beforeActivityList[i]
+
         # Valid activity that was open has now been closed, time spent is tracked as seconds
-        time_spent = int(time.time()) - int(beforeActivityList[i].timestamps['start'] / 1000)
-        print(time_spent)
+        time_spent = int(time.time()) - int(activity.timestamps['start'] / 1000)
+        print(f"LOG user - {after.name} activity - {activity.name} time - {time_spent}")
+
+        self.db.insertActivity(after.name, activity.name, time_spent)
