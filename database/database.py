@@ -80,14 +80,14 @@ class Database():
 
         print(f"LOG: Reaction {emoji} sent by {sender_id} to {receiver_id}")
 
-    # Get reaction count for a given user
-    def getReactionCount(self, author_id):
+    # Get reaction count for a given user and an emoji
+    def getReactionCount(self, user_id, emoji):
         sent_query = """
-                     SELECT COUNT(*) FROM reactions WHERE sender_id = ? AND emoji = ?;
+                     SELECT COUNT(*) FROM reactions WHERE sender = ? AND emoji = ?;
                      """
 
         received_query = """
-                         SELECT COUNT(*) FROM reactions WHERE receiver_id = ? AND emoji = ?;
+                         SELECT COUNT(*) FROM reactions WHERE receiver = ? AND emoji = ?;
                          """
 
         sent = self.cursor.execute(sent_query, (user_id, emoji)).fetchone()[0]
