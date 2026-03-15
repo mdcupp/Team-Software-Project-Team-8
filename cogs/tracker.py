@@ -21,6 +21,7 @@ class Tracker(commands.Cog):
             self.db.insertMessage(message.author, content)
 
     # On every reaction sent
+    @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         # Ignore bot reactions
         if user.bot:
