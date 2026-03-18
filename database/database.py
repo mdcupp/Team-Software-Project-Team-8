@@ -96,6 +96,30 @@ class Database():
 
         return sent, received
     
+    # Get leaderboard of given reaction
+    def getReactionLeaderboard(self, emoji, sentOrReceived):
+        if (sentOrReceived == 'sent'):
+            query = """
+                    SELECT sender, COUNT(*) 
+                    FROM reactions 
+                    WHERE emoji = ?
+                    GROUP BY sender
+                    ORDER BY sender ASC
+                    LIMIT 45;
+                    """
+        else:
+            query = """
+                    SELECT receiver, COUNT(*) 
+                    FROM reactions 
+                    WHERE emoji = ?
+                    GROUP BY receiver
+                    ORDER BY receiver ASC
+                    LIMIT 45;
+                    """
+
+        result = self.cursor.execute(query, (emoji)).fetchall()
+        return result
+
     # Create activity table if it doesn't exist
     def createActivityTable(self):
         self.cursor.execute("""
