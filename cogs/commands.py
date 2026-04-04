@@ -159,4 +159,26 @@ class Commands(commands.Cog):
 
         await ctx.send(f"Top users of {parameters[0]} by total {parameters[1]}:\n```{printable_list}```")
     
+    @commands.command()
+    async def memberHistory(self, ctx, *username):
+       if len(username) == 0:
+          await ctx.send("Usage: !memberHistory <username>")
+          return
+       
+       try:
+       member = await commands.MemberConverter().convert(ctx, username[0])
+       except commands.errors.MemberNotFound:
+          await ctx.send(f"**{username[0]}** could not be found in this server.")
+          return
 
+       events = self.db.getMemberHistory(member.id)
+
+       if not events:
+          await ctx.send("No data found.")
+          return
+
+       output = ""
+       for event, time in events:
+          output += f"{event:<6} {time}\n"
+
+       await ctx.send(f"History for **{member.name}**:\n```{output}```")
