@@ -169,37 +169,46 @@ class Database():
 
         return result
 
-   # Create member events table ONLY IF IT DOESNT EXIST
-   def createMemberEventsTable(self):
-      self.cursor.execute("""
-                          CREATE TABLE IF NOT EXISTS member_events(
-                          user_id, username, event_type, time
-                          );
-                      """)
-      self.con.commit()
-      print("LOG: Member Events Table created")
+    # Create member events table ONLY IF IT DOESNT EXIST
+    def createMemberEventsTable(self):
+       self.cursor.execute("""
+                           CREATE TABLE IF NOT EXISTS member_events(
+                           user_id, username, event_type, time
+                           );
+                       """)
+       self.con.commit()
+       print("LOG: Member Events Table created")
 
-   # Insert join into member events table
-   def insertJoin(self, user_id, username):
-      time = datetime.now()
-      self.cursor.execute("""
-                          INSERT INTO member_events VALUES(?, ?, ?, ?);
-                          """, (user_id, username, "join", time))
-      self.con.commit()
+    def resetEventTable(self):
+       self.cursor.executescript("""
+                                 DROP TABLE IF EXISTS member_events;
+                                 CREATE TABLE IF NOT EXISTS member_events(user_id, username, event_type, time);
+                                 """)
+       self.con.commit()
 
-   # Insert leave into member events table
-   def insertLeave(self, user_id, username):
-      time = datetime.now()
-      self.cursor.execute("""
-                          INSERT INTO member_events VALUES(?, ?, ?, ?);
-                          """, (user_id, username, "leave", time))
-      self.con.commit()
+       print("LOG: Event Table reset")
 
-   # Get history of joins/leaves for some user
-   def getMemberHistory(self, user_id):
-      return self.cursor.execute("""
-                                 SELECT event_type, time
-                                 FROM member_events
-                                 WHERE user_id = ?
-                                 ORDER BY time DESC;
-                                 """, (user_id,)).fetchall()
+    # Insert join into member events table
+    def insertJoin(self, user_id, username):
+       time = datetime.now()
+       self.cursor.execute("""
+                           INSERT INTO member_events VALUES(?, ?, ?, ?);
+                           """, (user_id, username, "join", time))
+       self.con.commit()
+ 
+    # Insert leave into member events table
+    def insertLeave(self, user_id, username):
+       time = datetime.now()
+       self.cursor.execute("""
+                           INSERT INTO member_events VALUES(?, ?, ?, ?);
+                           """, (user_id, username, "leave", time))
+       self.con.commit()
+ 
+    # Get history of joins/leaves for some user
+    def getMemberHistory(self, user_id):
+       return self.cursor.execute("""
+                                  SELECT event_type, time
+                                  FROM member_events
+                                  WHERE user_id = ?
+                                  ORDER BY time DESC;
+                                  """, (user_id,)).fetchall()

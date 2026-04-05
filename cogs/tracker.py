@@ -67,18 +67,28 @@ class Tracker(commands.Cog):
 
         self.db.insertActivity(after.name, activity.name, time_spent)
 
-   # When a user joins the server
-   @commands.Cog.listener()
-      async def on_member_join(self, member):
-      print(f"LOG: {member.name} joined the server")
+    # When a user joins the server
+    @commands.Cog.listener()
+    async def on_member_join(self, member):
+        print(f"LOG: {member.name} joined the server")
+ 
+        # store in DB
+        self.db.insertJoin(member.id, member.name)
 
-      # store in DB
-      self.db.insertJoin(member.id, member.name)
+        # output message
+        channel = member.guild.system_channel
+        if channel:
+           await channel.send(f"**{member.name}** joined the server")
+ 
+    # When a user leaves the server
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+       print(f"LOG: {member.name} left the server")
 
-   # When a user leaves the server
-   @commands.Cog.listener()
-      async def on_member_remove(self, member):
-      print(f"LOG: {member.name} left the server")
+       # store in DB
+       self.db.insertLeave(member.id, member.name)
 
-      # store in DB
-      self.db.insertLeave(member.id, member.name)
+       # output message
+       channel = member.guild.system_channel
+       if channel:
+          await channel.send(f"**{member.name}** left the server")

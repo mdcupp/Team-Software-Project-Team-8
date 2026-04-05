@@ -19,8 +19,9 @@ class Commands(commands.Cog):
         !resetMessageTable - Clear message table
         !displayData <username> - Get public data of a user (Doesn't pull real data yet)
         !activityList <username> - Get activity list of a user
-        !reactionUser <reaction> <username>
-        !reactionLeaderboard <reaction> <sent/received>
+        !reactionUser <reaction> <username> - Get sent/received count of a reaction for a given user
+        !reactionLeaderboard <reaction> <sent/received> - See leaderboard of sent/received counts for a given reaction
+        !memberHistory <username> - See history of joins and leaves for a given user
     """)
 
     # Test command to make sure bot is running
@@ -34,6 +35,11 @@ class Commands(commands.Cog):
         self.db.resetMessageTable()
         await ctx.send("Table Reset")
 
+    # Remove event table from database and create a new one
+    @commands.command()
+    async def resetEventTable(self, ctx):
+        self.db.resetEventTable()
+        await ctx.send("Event Table Reset")
 
     # Prints message count from user
     @commands.command()
@@ -166,19 +172,30 @@ class Commands(commands.Cog):
           return
        
        try:
-       member = await commands.MemberConverter().convert(ctx, username[0])
+          member = await commands.MemberConverter().convert(ctx, username[0])
+          user_id = member.id
+          display_name = member.name
        except commands.errors.MemberNotFound:
-          await ctx.send(f"**{username[0]}** could not be found in this server.")
-          return
+          result = self.db.cursor.execute(
+                   "SELECT user_id, username FROM member_events WHERE username = ? COLLATE NOCASE LIMIT 1;",
+                   (username[0],)
+          ).fetchone()
+          if not result:
+             await ctx.send(f"No data found for **{username[0]}**.")
+             return
+          user_id, display_name = result
 
-       events = self.db.getMemberHistory(member.id)
+       events = self.db.getMemberHistory(user_id)
 
        if not events:
-          await ctx.send("No data found.")
+          await ctx.send("No join/leave data found.")
           return
 
        output = ""
        for event, time in events:
-          output += f"{event:<6} {time}\n"
+          time_str = str(time)
+          time_str = time_str.split(".")[0]
 
-       await ctx.send(f"History for **{member.name}**:\n```{output}```")
+          output += f"{event:<6} {time_str}\n"
+
+       await ctx.send(f"History for **{display_name}**:\n```{output}```")
