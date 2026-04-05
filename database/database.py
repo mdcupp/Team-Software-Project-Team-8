@@ -11,6 +11,7 @@ class Database():
         self.createReactionTable()
         self.createActivityTable()
         self.createMemberEventsTable()
+        self.createUsersTable()
         
     # Creates the message table ONLY IF IT DOES NOT EXIST
     def createMessageTable(self):
@@ -212,3 +213,54 @@ class Database():
                                   WHERE user_id = ?
                                   ORDER BY time DESC;
                                   """, (user_id,)).fetchall()
+
+    # ---------- User Tracking ----------
+    # Creates the users table ONLY IF IT DOES NOT EXIST
+    def createUsersTable(self):
+        self.cursor.execute("""
+                            CREATE TABLE IF NOT EXISTS users(userId, username, displayName, joinDate);
+                            """)
+        
+        print("LOG: Users Table created if not exists")
+
+    # DELETES and recreates the users table
+    def resetUsersTable(self):
+        self.cursor.executescript("""
+                            DROP TABLE IF EXISTS users;
+                            CREATE TABLE IF NOT EXISTS users(userId, username, displayName, joinDate);
+                            """)
+        self.con.commit()
+        
+        print("LOG: Users Table Reset")
+
+    # Inserts a user into the users table 
+    def insertUser(self, userId, username, displayName, joinDate):
+        # time = datetime.now()
+        self.cursor.execute("""
+                            INSERT INTO users VALUES(?, ?, ?, ?); 
+                            """, (userId, username, displayName, joinDate))
+        self.con.commit()
+
+        print(f"LOG: User Added \n  ID: {userId}\n  Username: {username}\n  Display Name: {displayName}\n  Join Date: {joinDate}")
+
+    # returns true if the user exists in the table already
+    def isUserTracked(self, userId):
+        result = self.cursor.execute("""
+                                     SELECT COUNT(*) FROM users WHERE userId = ?;
+                                     """, (userId,))
+        result = self.cursor.fetchone()
+
+        if result[0] == 1:
+            return True
+        else:
+            return False
+
+    # get the user information from username
+    def getUserInfo(self, username):
+        result = self.cursor.execute("""
+                                     SELECT * FROM users WHERE username = ?;
+                                     """, (username,))
+        result = self.cursor.fetchone() 
+    
+        return result
+

@@ -17,7 +17,8 @@ class Commands(commands.Cog):
         !ping - Test Command
         !messageTotal <username> - Prints message count recorded from user
         !resetMessageTable - Clear message table
-        !displayData <username> - Get public data of a user (Doesn't pull real data yet)
+        !userInfo <username> - Get public data of a user (Does pull real data yet)
+        !resertUsersTable - Clears the user table
         !activityList <username> - Get activity list of a user
         !reactionUser <reaction> <username> - Get sent/received count of a reaction for a given user
         !reactionLeaderboard <reaction> <sent/received> - See leaderboard of sent/received counts for a given reaction
@@ -58,17 +59,6 @@ class Commands(commands.Cog):
         
         await ctx.send(f"**{member.name}** has sent {count} messages.")
 
-
-    # Display public data of a given user
-    @commands.command()
-    async def displayData(self, ctx, *username):
-        # Check if arguments received
-        if (len(username) == 0):
-            await ctx.send("Usage: !displayData <username>")
-            return
-        image = discord.File('placeholder.png')
-
-        await ctx.send(file = image, content = f"\n**Username:** {username[0]}\n**User ID:**\n**Account Created:**")
 
     # View activity list of a given user
     @commands.command()
@@ -199,3 +189,43 @@ class Commands(commands.Cog):
           output += f"{event:<6} {time_str}\n"
 
        await ctx.send(f"History for **{display_name}**:\n```{output}```")
+
+# ---------- User Commands ----------
+    # Removes table from database, then creates a new one
+    @commands.command()
+    async def resetUsersTable(self, ctx):
+        self.db.resetUsersTable()
+        await ctx.send("Users Table Reset")
+
+
+    # Prints User Information
+    @commands.command()
+    async def userInfo(self, ctx, *username):
+        if (len(username) == 0):
+            await ctx.send("Usage: !messageTotal <username>")
+            return
+        
+        member = ""
+
+        # get member object if it exists
+        try:
+            member = await commands.MemberConverter().convert(ctx, username[0])
+        except commands.errors.MemberNotFound:
+            await ctx.send(f"**{username[0]}** could not be found in this server.")
+            return
+
+        info = self.db.getUserInfo(username[0])
+
+        # make an embed cause it can print image and looks cool
+        embed = discord.Embed(
+            title = f"User Info: {info[1]}",
+            color = discord.Color.blue()
+        )
+
+        embed.add_field(name="ID", value=info[0], inline=False)
+        embed.add_field(name="Display Name", value=info[2], inline=False)
+        embed.add_field(name="Join Date", value=info[3], inline=False)
+
+        embed.set_thumbnail(url=member.display_avatar.url)
+
+        await ctx.send(embed=embed)

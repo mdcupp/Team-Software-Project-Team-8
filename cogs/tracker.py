@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from datetime import datetime
 import time
 
 class Tracker(commands.Cog):
@@ -74,6 +75,8 @@ class Tracker(commands.Cog):
  
         # store in DB
         self.db.insertJoin(member.id, member.name)
+        if (not self.db.isUserTracked(member.id)):
+            self.db.insertUser(member.id, member.name, member.display_name, datetime.now().timestamp())
 
         # output message
         channel = member.guild.system_channel
@@ -112,3 +115,12 @@ class Tracker(commands.Cog):
 
         print(f"LOG: Message '{message.author}: {content} {attachString}' was deleted")
         await channel.send(f"**Deleted message:** '{message.author}: {content} {attachString}'")
+
+    #Whenever the bot starts up
+    @commands.Cog.listener()
+    async def on_ready(self):
+        for server in self.bot.guilds:
+            for member in server.members:
+                if (not self.db.isUserTracked(member.id)):
+                    self.db.insertUser(member.id, member.name, member.display_name, "Unknown")
+            
