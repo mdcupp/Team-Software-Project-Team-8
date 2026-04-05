@@ -92,3 +92,23 @@ class Tracker(commands.Cog):
        channel = member.guild.system_channel
        if channel:
           await channel.send(f"**{member.name}** left the server")
+
+    # When a user deletes a message
+    @commands.Cog.listener()
+    async def on_message_delete(self, message):     
+        content = str(message.content)
+        if not content:
+           content = '<no text>'
+
+        # Choose channel to output to
+        channel = message.author.guild.system_channel
+        if not channel:
+            channel = message.channel
+
+        # Get string of attachments
+        attachString = ""
+        for attachment in message.attachments:
+            attachString += attachment.url + " "
+
+        print(f"LOG: Message '{message.author}: {content} {attachString}' was deleted")
+        await channel.send(f"**Deleted message:** '{message.author}: {content} {attachString}'")
