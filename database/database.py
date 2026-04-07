@@ -51,6 +51,23 @@ class Database():
         count = result[0] if result else 0
     
         return count
+    
+    def getMessageServerTotal(self):
+        result = self.cursor.execute("""
+                                     SELECT COUNT(*) FROM messages;
+                                     """).fetchone()
+        
+        count = result[0] if result else 0
+
+        return count
+    
+    # Get the leaderboard of total messages
+    def getMessageLeaderboard(self):
+        result = self.cursor.execute("""
+                            SELECT author, COUNT(*) as total FROM messages GROUP BY author ORDER BY total DESC LIMIT 45;
+                            """).fetchall()
+        
+        return result
 
     # Create reaction table if it doesn't exist
     def createReactionTable(self):
@@ -101,20 +118,20 @@ class Database():
     def getReactionLeaderboard(self, emoji, sentOrReceived):
         if (sentOrReceived == 'sent'):
             query = """
-                    SELECT sender, COUNT(*) 
+                    SELECT sender, COUNT(*) as total
                     FROM reactions 
                     WHERE emoji = ?
                     GROUP BY sender
-                    ORDER BY sender ASC
+                    ORDER BY total DESC
                     LIMIT 45;
                     """
         else:
             query = """
-                    SELECT receiver, COUNT(*) 
+                    SELECT receiver, COUNT(*) as total 
                     FROM reactions 
                     WHERE emoji = ?
                     GROUP BY receiver
-                    ORDER BY receiver ASC
+                    ORDER BY total DESC
                     LIMIT 45;
                     """
 

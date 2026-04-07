@@ -16,6 +16,7 @@ class Commands(commands.Cog):
         !helpMe - List Commands
         !ping - Test Command
         !messageTotal <username> - Prints message count recorded from user
+        !messageLeaderboard - Prints leaderboard of total message counts in server
         !resetMessageTable - Clear message table
         !userInfo <username> - Get public data of a user (Does pull real data yet)
         !resertUsersTable - Clears the user table
@@ -49,6 +50,11 @@ class Commands(commands.Cog):
             await ctx.send("Usage: !messageTotal <username>")
             return
         
+        if (username[0] == 'server'):
+            result = self.db.getMessageServerTotal()
+            await ctx.send(f"Total amount of messages sent in server: {result}")
+            return
+
         try:
             member = await commands.MemberConverter().convert(ctx, username[0])
         except commands.errors.MemberNotFound:
@@ -59,6 +65,19 @@ class Commands(commands.Cog):
         
         await ctx.send(f"**{member.name}** has sent {count} messages.")
 
+    # Prints message leaderboard of server
+    @commands.command()
+    async def messageLeaderboard(self, ctx):
+
+        list = self.db.getMessageLeaderboard()
+        
+        printable_list = f"{'Member':<16s} {'Total':<5s}\n"
+        for id, number in list:
+            stringId = f"{id}"
+            member = await commands.MemberConverter().convert(ctx, stringId)
+            printable_list = printable_list + f"{member.name:<16s} {number:<5d}\n"
+
+        await ctx.send(f"Top message counts of users:\n```{printable_list}```")
 
     # View activity list of a given user
     @commands.command()
@@ -146,6 +165,7 @@ class Commands(commands.Cog):
 
         if not list:
             await ctx.send(f"{parameters[0]} has no associated data.")
+            return
 
         printable_list = f"{'Member':<16s} {str.capitalize(parameters[1]):<5s}\n"
         for id, number in list:
