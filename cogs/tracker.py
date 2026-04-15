@@ -76,7 +76,7 @@ class Tracker(commands.Cog):
         # store in DB
         self.db.insertJoin(member.id, member.name)
         if (not self.db.isUserTracked(member.id)):
-            self.db.insertUser(member.id, member.name, member.display_name, datetime.now().timestamp())
+            self.db.insertUser(member.id, member.name, member.display_name, member.joined_at.strftime("%b %d, %Y UTC"))
 
         # output message
         channel = member.guild.system_channel
@@ -122,5 +122,5 @@ class Tracker(commands.Cog):
         for server in self.bot.guilds:
             for member in server.members:
                 if (not self.db.isUserTracked(member.id)):
-                    self.db.insertUser(member.id, member.name, member.display_name, "Unknown")
+                    self.db.insertUser(member.id, member.name, member.display_name, member.joined_at.strftime("%b %d, %Y UTC"))
             

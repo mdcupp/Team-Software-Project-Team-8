@@ -11,20 +11,26 @@ class Commands(commands.Cog):
     # Command to print other commands
     @commands.command()
     async def helpMe(self, ctx):
-        await ctx.send("""
-        **Command List**:
+        embed = discord.Embed(
+        title = "**Command List:**",
+            color = discord.Color.blue()
+       )
+
+        embed.add_field(name="", value="""
         !helpMe - List Commands
         !ping - Test Command
         !messageTotal <username> - Prints message count recorded from user
         !messageLeaderboard - Prints leaderboard of total message counts in server
         !resetMessageTable - Clear message table
-        !userInfo <username> - Get public data of a user (Does pull real data yet)
-        !resertUsersTable - Clears the user table
+        !userInfo <username> - Get public data of a user
+        !resetUsersTable - Clears the user table
         !activityList <username> - Get activity list of a user
         !reactionUser <reaction> <username> - Get sent/received count of a reaction for a given user
         !reactionLeaderboard <reaction> <sent/received> - See leaderboard of sent/received counts for a given reaction
         !memberHistory <username> - See history of joins and leaves for a given user
-    """)
+        """, inline=False)
+
+        await ctx.send(embed=embed)
 
     # Test command to make sure bot is running
     @commands.command()
@@ -52,6 +58,7 @@ class Commands(commands.Cog):
         
         if (username[0] == 'server'):
             result = self.db.getMessageServerTotal()
+            
             await ctx.send(f"Total amount of messages sent in server: {result}")
             return
 
@@ -97,6 +104,11 @@ class Commands(commands.Cog):
         # Get Activity List
         list = self.db.getActivityTime(username)
 
+        embed = discord.Embed(
+            title = f"Recorded Activites for: {username[0]}",
+            color = discord.Color.blue()
+        )
+
         printable_list = f"{'Activity':<32s} {'H:Min:Sec':<9s}\n"
         
         # Turn seconds in Hours, Minutes, Seconds
@@ -117,15 +129,18 @@ class Commands(commands.Cog):
 
             # Format it
             time = f"{hours}:{minutes:02d}:{seconds:02d}"
-            printable_list = printable_list + f"{activity:32s} {time:7s}\n"
+            embed.add_field(name=f"{i+1}. {activity}", value=f"{time}", inline=False)
 
             # Max of 45 rows can be printed until character limit will be reached
             i = i + 1
             if i == 45:
                 break 
 
+                
+        embed.set_thumbnail(url=member.display_avatar.url)
+
         # Print it
-        await ctx.send(f"Recorded activities for **{username[0]}**:\n```{printable_list}```")
+        await ctx.send(embed=embed)
 
     # View how many times a user has sent a reaction
     @commands.command()
@@ -148,10 +163,18 @@ class Commands(commands.Cog):
             await ctx.send(f"{parameters[0]} has no associated data.")
             return
 
-        await ctx.send(f"{parameters[0]} counts for **{member.name}**:\n"
-                       f"Sent: {sent}\n"
-                       f"Received: {received}"
-                      )
+        embed = discord.Embed(
+            title = f"{parameters[0]} counts for: {member.name}",
+            color = discord.Color.blue()
+        )
+
+        embed.add_field(name=f"Sent:",value=f"{sent}",inline=False)
+        embed.add_field(name=f"Received:",value=f"{received}",inline=False)
+
+        embed.set_thumbnail(url=member.display_avatar.url)
+
+
+        await ctx.send(embed=embed)
 
     # View leaderboard for a reaction
     @commands.command()
@@ -177,38 +200,46 @@ class Commands(commands.Cog):
     
     @commands.command()
     async def memberHistory(self, ctx, *username):
-       if len(username) == 0:
-          await ctx.send("Usage: !memberHistory <username>")
-          return
+        if len(username) == 0:
+            await ctx.send("Usage: !memberHistory <username>")
+            return
        
-       try:
-          member = await commands.MemberConverter().convert(ctx, username[0])
-          user_id = member.id
-          display_name = member.name
-       except commands.errors.MemberNotFound:
-          result = self.db.cursor.execute(
-                   "SELECT user_id, username FROM member_events WHERE username = ? COLLATE NOCASE LIMIT 1;",
-                   (username[0],)
-          ).fetchone()
-          if not result:
-             await ctx.send(f"No data found for **{username[0]}**.")
-             return
-          user_id, display_name = result
+        try:
+            member = await commands.MemberConverter().convert(ctx, username[0])
+            user_id = member.id
+            display_name = member.name
+        except commands.errors.MemberNotFound:
+            result = self.db.cursor.execute(
+                    "SELECT user_id, username FROM member_events WHERE username = ? COLLATE NOCASE LIMIT 1;",
+                    (username[0],)
+            ).fetchone()
+            if not result:
+                await ctx.send(f"No data found for **{username[0]}**.")
+                return
+            user_id, display_name = result
+            member = await self.bot.fetch_user(user_id)
 
-       events = self.db.getMemberHistory(user_id)
+        events = self.db.getMemberHistory(user_id)
 
-       if not events:
-          await ctx.send("No join/leave data found.")
-          return
+        if not events:
+            await ctx.send("No join/leave data found.")
+            return
+       
+        # make an embed cause it can print image and looks cool
+        embed = discord.Embed(
+        title = f"History for **{display_name}**",
+            color = discord.Color.blue()
+       )
 
-       output = ""
-       for event, time in events:
-          time_str = str(time)
-          time_str = time_str.split(".")[0]
+        embed.set_thumbnail(url=member.display_avatar.url)
 
-          output += f"{event:<6} {time_str}\n"
+        for event, time in events:
+            time_str = str(time)
+            time_str = time_str.split(".")[0]
 
-       await ctx.send(f"History for **{display_name}**:\n```{output}```")
+            embed.add_field(name=f"{event[:1].upper() + event[1:]}", value=f"{time_str}", inline=False)
+
+        await ctx.send(embed=embed)
 
 # ---------- User Commands ----------
     # Removes table from database, then creates a new one
