@@ -23,7 +23,6 @@ class Commands(commands.Cog):
         !messageLeaderboard - Prints leaderboard of total message counts in server
         !resetMessageTable - Clear message table
         !userInfo <username> - Get public data of a user
-        !resetUsersTable - Clears the user table
         !activityList <username> - Get activity list of a user
         !reactionUser <reaction> <username> - Get sent/received count of a reaction for a given user
         !reactionLeaderboard <reaction> <sent/received> - See leaderboard of sent/received counts for a given reaction
@@ -36,18 +35,6 @@ class Commands(commands.Cog):
     @commands.command()
     async def ping(self, ctx):
         await ctx.send("Pong!")
-
-    # Removes table from database, then creates a new one
-    @commands.command()
-    async def resetMessageTable(self, ctx):
-        self.db.resetMessageTable()
-        await ctx.send("Table Reset")
-
-    # Remove event table from database and create a new one
-    @commands.command()
-    async def resetEventTable(self, ctx):
-        self.db.resetEventTable()
-        await ctx.send("Event Table Reset")
 
     # Prints message count from user
     @commands.command()
@@ -242,13 +229,6 @@ class Commands(commands.Cog):
         await ctx.send(embed=embed)
 
 # ---------- User Commands ----------
-    # Removes table from database, then creates a new one
-    @commands.command()
-    async def resetUsersTable(self, ctx):
-        self.db.resetUsersTable()
-        await ctx.send("Users Table Reset")
-
-
     # Prints User Information
     @commands.command()
     async def userInfo(self, ctx, *username):

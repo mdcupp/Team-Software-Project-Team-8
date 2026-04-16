@@ -21,16 +21,6 @@ class Database():
         
         print("LOG: Messages Table created if not exists")
 
-    # DELETES and recreates the message table
-    def resetMessageTable(self):
-        self.cursor.executescript("""
-                            DROP TABLE IF EXISTS messages;
-                            CREATE TABLE IF NOT EXISTS messages(author, message, time);
-                            """)
-        self.con.commit()
-        
-        print("LOG: Messages Table Reset")
-
     # Inserts a message into the message table 
     def insertMessage(self, author, message):
         time = datetime.now()
@@ -76,16 +66,6 @@ class Database():
                             """)
 
         print("LOG: Reactions Table created if not already existing")
-
-    # Reset reaction table
-    def resetReactionTable(self):
-        self.cursor.executescript("""
-                                  DROP TABLE IF EXISTS reactions;
-                                  CREATE TABLE IF NOT EXISTS reactions(emoji, sender, receiver, message_id, time);
-                                  """)
-        self.con.commit()
-
-        print("LOG: Reactions Table reset")
 
     # Insert log of reaction into table
     def insertReaction(self, emoji, sender_id, receiver_id, message_id):
@@ -146,16 +126,6 @@ class Database():
 
         print("LOG: Activity Table created if not already existing")
 
-    # Reset activity table
-    def resetActivityTable(self):
-        self.cursor.executescript("""
-                                  DROP TABLE IF EXISTS activity;
-                                  CREATE TABLE IF NOT EXISTS activity(user, activity, seconds);
-                                  """)
-        self.con.commit()
-
-        print("LOG: Activity Table reset")
-
     # Insert activity into table
     def insertActivity(self, user, activity, seconds):
         # Check if this activity has been logged before
@@ -197,15 +167,6 @@ class Database():
        self.con.commit()
        print("LOG: Member Events Table created")
 
-    def resetEventTable(self):
-       self.cursor.executescript("""
-                                 DROP TABLE IF EXISTS member_events;
-                                 CREATE TABLE IF NOT EXISTS member_events(user_id, username, event_type, time);
-                                 """)
-       self.con.commit()
-
-       print("LOG: Event Table reset")
-
     # Insert join into member events table
     def insertJoin(self, user_id, username):
        time = datetime.now()
@@ -239,16 +200,6 @@ class Database():
                             """)
         
         print("LOG: Users Table created if not exists")
-
-    # DELETES and recreates the users table
-    def resetUsersTable(self):
-        self.cursor.executescript("""
-                            DROP TABLE IF EXISTS users;
-                            CREATE TABLE IF NOT EXISTS users(userId, username, displayName, joinDate);
-                            """)
-        self.con.commit()
-        
-        print("LOG: Users Table Reset")
 
     # Inserts a user into the users table 
     def insertUser(self, userId, username, displayName, joinDate):

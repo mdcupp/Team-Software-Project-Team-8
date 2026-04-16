@@ -28,7 +28,7 @@ async def loadExtensions():
 async def main():
     async with bot:
         await loadExtensions()
-        await bot.start("API KEY")
+        await bot.start("BOT TOKEN")
 
 # Run the main function
 asyncio.run(main())
